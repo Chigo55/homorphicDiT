@@ -1,30 +1,27 @@
 import os
+import torch.nn as nn
 
 from lightning import Trainer
 from pathlib import Path
-from tqdm.auto import tqdm
 
 from data.dataloader import CustomDataModule
 from data.utils import DataTransform
 
 
 class LightningValidater:
-    def __init__(self, model, trainer: Trainer, ckpt: Path, hparams: dict):
+    def __init__(self, model: nn.Module, trainer: Trainer, hparams: dict, ckpt: Path = None):
+        self.trainer = trainer
         self.hparams = hparams
 
-        # --- 모델 정의
         if ckpt:
             self.model = model.load_from_checkpoint(
-                checkpoint_path=ckpt,
-                map_location="cuda",
+                checkpoint_path=str(object=ckpt),
+                map_location="cpu",
             )
             self.ckpt = ckpt
         else:
-            self.model = model
+            self.model = model(hparams=hparams)
             self.ckpt = "best"
-
-        # --- Lightning Trainer 정의
-        self.trainer = trainer
 
         # --- DataModule 정의
         self.datamodule = self._build_datamodule()
@@ -37,16 +34,13 @@ class LightningValidater:
             bench_dir=self.hparams["bench_data_path"],
             transform=DataTransform(image_size=self.hparams["image_size"]),
             batch_size=self.hparams["batch_size"],
-            num_workers=int(os.cpu_count() * 0.7),
+            num_workers=int(os.cpu_count() * 0.9),
         )
 
     def run(self):
-        print("[INFO] Start validating...")
+        print("[INFO] Start Validating...")
         results = self.trainer.validate(
             model=self.model,
             datamodule=self.datamodule,
-            ckpt_path=self.ckpt
         )
-        print("[VALIDATION RESULT]")
-        for res in tqdm(results):
-            print(res)
+        print("[INFO] Validation Completed.")

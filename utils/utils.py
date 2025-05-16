@@ -1,11 +1,6 @@
 from pathlib import Path
-import os
-import random
-import numpy as np
-import torch
 from torchvision.utils import save_image
 from torchinfo import summary
-from tqdm.auto import tqdm
 
 
 def make_dirs(path: str | Path):
@@ -20,12 +15,12 @@ def print_metrics(metrics: dict, prefix: str = ""):
 
 
 def save_images(results, save_dir, prefix="infer", ext="png"):
-    for i, datasets in enumerate(results):
-        save_path = make_dirs(f"{save_dir}/batch{i+1}")
-        for ii, batch in enumerate(datasets):
+    for i, datasets in enumerate(iterable=results):
+        save_path = make_dirs(path=f"{save_dir}/batch{i+1}")
+        for ii, batch in enumerate(iterable=datasets):
             save_image(
-                batch,
-                save_path / f"{prefix}_{ii:04d}.{ext}",
+                tensor=batch,
+                fp=save_path / f"{prefix}_{ii:04d}.{ext}",
                 nrow=8,
                 padding=2,
                 normalize=True,
@@ -38,4 +33,4 @@ def count_parameters(model):
 
 
 def summarize_model(model, input_size):
-    return summary(model, input_size=input_size, depth=3, col_names=["input_size", "output_size", "num_params"])
+    return summary(model=model, input_size=input_size, depth=3, col_names=["input_size", "output_size", "num_params"])

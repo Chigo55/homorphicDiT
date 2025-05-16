@@ -174,5 +174,14 @@ cython_debug/
 .pypirc
 
 # Custom .gitignore
-data/*
+!data/*.py
+!data/*.gitkeep
+data/1_train/*
+!data/1_train/*.gitkeep
+data/2_valid/*
+!data/2_valid/*.gitkeep
+data/3_bench/*
+!data/3_bench/*.gitkeep
+data/4_infer/*
+!data/4_infer/*.gitkeep
 runs/
